@@ -5,6 +5,7 @@
 #include "helpers.h"
 
 #define PIN_D3 0
+#define PIN_D2 4
 #define PIN_D4_LED 2
 RCSwitch mySwitch = RCSwitch();
 
@@ -68,7 +69,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
     if(strcmp(strPayload, "ON") == 0){
       Serial.println("Received ON_REQUEST");
       digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
-      mySwitch.switchOn(code1, code2);
+      //mySwitch.switchOn(code1, code2);
+      //mySwitch.send(10400573, 24);
+      mySwitch.send(10367805, 24);
       delay(100);
       Serial.printf("pub: %s\n", pubTopic.c_str());
       client.publish(pubTopic.c_str() , "ON", true );
@@ -76,7 +79,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
     if(strcmp(strPayload, "OFF") == 0){
       Serial.println("Received OFF_REQUEST");
       digitalWrite(BUILTIN_LED, HIGH);   // Turn the LED on (Note that LOW is the voltage level
-      mySwitch.switchOff(code1, code2);
+      //mySwitch.switchOff(code1, code2);
+      //mySwitch.send(10400565, 24);
+      mySwitch.send(10367797, 24);
       delay(100);
       Serial.printf("pub: %s\n", pubTopic.c_str());
       client.publish(pubTopic.c_str() , "OFF", true );
@@ -168,6 +173,7 @@ void setup() {
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
   // Transmitter is connected to Arduino Pin #10  
   mySwitch.enableTransmit(PIN_D3);
+  mySwitch.enableReceive(PIN_D2);  // Receiver input on interrupt 0 (D2)
 
   // Optional set pulse length.
   //mySwitch.setPulseLength(pulseLength);
@@ -189,6 +195,19 @@ void loop() {
     reconnect();
   }
   client.loop();
+
+  if (mySwitch.available()) {
+    Serial.print("Received ");
+    Serial.print( mySwitch.getReceivedValue() );
+    Serial.print(" / ");
+    Serial.print( mySwitch.getReceivedBitlength() );
+    Serial.print("Bit ");
+    Serial.print(" // ");
+    Serial.print("Protocol: ");
+    Serial.println( mySwitch.getReceivedProtocol() );
+    Serial.printf("Delay: %d\n", mySwitch.getReceivedDelay());
+    mySwitch.resetAvailable();
+  }
 
   long now = millis();
   if (now - lastMsg > timeBetweenMessages ) {
