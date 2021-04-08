@@ -1,14 +1,16 @@
 #include "RCSwitch.h"
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
-
-#include "helpers.h"
+#include <Arduino.h>
+#include <DeviceSwitch.h>
+#include <DeviceSwitchFactory.h>
+#include <RFSenderRCSwitch.h>
 
 #define PIN_D3 0
 #define PIN_D2 4
 #define PIN_D4_LED 2
-RCSwitch mySwitch = RCSwitch();
-
+RFSenderRCSwitch mySwitch = RFSenderRCSwitch(RCSwitch());
+DeviceSwitchFactory g_deviceSwitchFactory(&mySwitch);
 // Update these with values suitable for your network.
 
 const char *ssid = "Drop it like it's Hotspot";
@@ -56,7 +58,7 @@ void handleDipSwitch(char *topic, char *strPayload)
   char code1[6] = "";
   char code2[6] = "";
 
-  if (!extractDipCodeFromTopic(topic, code1, code2))
+  if (!DeviceSwitchFactory::extractDipCodeFromTopic(topic, code1, code2))
   {
     Serial.printf("Failed to decode codes");
     return;
@@ -89,7 +91,7 @@ void handleDipSwitch(char *topic, char *strPayload)
 void handleCodeIdSwitch(char *topic, char *strPayload)
 {
   long codeid = 0;
-  if (!extractCodeIdFromTopic(topic, &codeid))
+  if (!DeviceSwitchFactory::extractCodeIdFromTopic(topic, &codeid))
   {
     Serial.printf("Failed to decode codes");
     return;
@@ -104,7 +106,7 @@ void handleCodeIdSwitch(char *topic, char *strPayload)
     digitalWrite(LED_BUILTIN, LOW); // Turn the LED on (Note that LOW is the voltage level
     //mySwitch.switchOn(code1, code2);
     //mySwitch.send(10400573, 24);
-    mySwitch.send(codeid, 24);
+    //mySwitch.send(codeid, 24);
     delay(100);
     Serial.printf("pub: %s\n", pubTopic.c_str());
     client.publish(pubTopic.c_str(), "ON", true);
@@ -115,7 +117,7 @@ void handleCodeIdSwitch(char *topic, char *strPayload)
     digitalWrite(LED_BUILTIN, HIGH); // Turn the LED on (Note that LOW is the voltage level
     //mySwitch.switchOff(code1, code2);
     //mySwitch.send(10400565, 24);
-    mySwitch.send(codeid - 8, 24);
+    //mySwitch.send(codeid - 8, 24);
     delay(100);
     Serial.printf("pub: %s\n", pubTopic.c_str());
     client.publish(pubTopic.c_str(), "OFF", true);
@@ -132,19 +134,55 @@ void callback(char *topic, byte *payload, unsigned int length)
   memcpy(strPayload, payload, length);
   strPayload[length] = 0; // Null termination.
   Serial.printf("Payload: %s\n", strPayload);
+  IDeviceSwitch *deviceSwitch = g_deviceSwitchFactory.create(topic);
 
-  switch_type switchType = getSwitchType(topic);
-  if (switchType == dip)
+  if (deviceSwitch == NULL)
+  {
+    Serial.printf("Unexpected Switch");
+    return;
+  }
+
+  String pubTopic(topic);
+  pubTopic.replace(TOPIC_SWITCH, TOPIC_STATE);
+  if (strcmp(strPayload, "ON") == 0)
+  {
+    Serial.println("Received ON_REQUEST");
+    digitalWrite(LED_BUILTIN, LOW); // Turn the LED on (Note that LOW is the voltage level
+    //mySwitch.switchOn(code1, code2);
+    //mySwitch.send(10400573, 24);
+    //mySwitch.send(codeid, 24);
+    deviceSwitch->turnOn();
+    delay(100);
+    Serial.printf("pub: %s\n", pubTopic.c_str());
+    client.publish(pubTopic.c_str(), "ON", true);
+  }
+  if (strcmp(strPayload, "OFF") == 0)
+  {
+    Serial.println("Received OFF_REQUEST");
+    digitalWrite(LED_BUILTIN, HIGH); // Turn the LED on (Note that LOW is the voltage level
+    //mySwitch.switchOff(code1, code2);
+    //mySwitch.send(10400565, 24);
+    //mySwitch.send(codeid - 8, 24);
+    deviceSwitch->turnOff();
+    delay(100);
+    Serial.printf("pub: %s\n", pubTopic.c_str());
+    client.publish(pubTopic.c_str(), "OFF", true);
+  }
+
+  /*
+  DeviceSwitchFactory::switch_type switchType = DeviceSwitchFactory::getSwitchType(topic);
+  if (switchType == DeviceSwitchFactory::dip)
   {
     handleDipSwitch(topic, strPayload);
   }
-  else if (switchType == codeid)
+  else if (switchType == DeviceSwitchFactory::codeid)
   {
     handleCodeIdSwitch(topic, strPayload);
   }
   else{
     Serial.printf("Unexpected Switch");
   }
+  */
 
   /*
   if(strlen(strPayload) != 11){
@@ -268,20 +306,22 @@ void loop()
     reconnect();
   }
   client.loop();
-
+  // TODO: implement receiver
+  /*
   if (mySwitch.available())
   {
     Serial.print("Received ");
-    Serial.print(mySwitch.getReceivedValue());
+    //Serial.print(mySwitch.getReceivedValue());
     Serial.print(" / ");
-    Serial.print(mySwitch.getReceivedBitlength());
+    //Serial.print(mySwitch.getReceivedBitlength());
     Serial.print("Bit ");
     Serial.print(" // ");
     Serial.print("Protocol: ");
-    Serial.println(mySwitch.getReceivedProtocol());
+    //Serial.println(mySwitch.getReceivedProtocol());
     Serial.printf("Delay: %d\n", mySwitch.getReceivedDelay());
     mySwitch.resetAvailable();
   }
+  */
   /*
   long now = millis();
   if (now - lastMsg > timeBetweenMessages)

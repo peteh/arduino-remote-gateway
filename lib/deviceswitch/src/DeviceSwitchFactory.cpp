@@ -1,27 +1,38 @@
-
-#include <iostream>
-#include <string.h>
 #include <stdlib.h>
-#include "helpers.h"
+#include <string.h>
+#include <iostream>
+#include "DeviceSwitchFactory.h"
+#include "DeviceSwitch.h"
+#include "DipDeviceSwitch.h"
+#include "CodeIdDeviceSwitch.h"
+#include "RFSender.h"
 
-switch_type getSwitchType(char *topic)
+DeviceSwitchFactory::DeviceSwitchFactory(IRFSender* rfSender)
+    : m_rfSender(rfSender)
+{
+}
+
+DeviceSwitchFactory::switch_type DeviceSwitchFactory::getSwitchType(const char *topic)
 {
     if (strstr(topic, "/dip/") != NULL)
     {
         return dip;
     }
-    if (strstr(topic, "/codeid/") != NULL){
+    if (strstr(topic, "/codeid/") != NULL)
+    {
         return codeid;
     }
     return unknown;
 }
 
-bool extractCodeIdFromTopic(char* topic, long* codeid_){
-     // rfdevices / [unique identifier] / dip / [codeid] / switch
+bool DeviceSwitchFactory::extractCodeIdFromTopic(const char *topic, long *codeid_)
+{
+    // rfdevices / [unique identifier] / dip / [codeid] / switch
     const char searchSlash[2] = "/";
     char *tokenSlash;
-
-    tokenSlash = strtok(topic, searchSlash);
+    char topicSearch [strlen(topic) + 1];
+    strcpy(topicSearch, topic);
+    tokenSlash = strtok(topicSearch, searchSlash);
     // skip all tokens till "dip"
     for (int i = 0; i < 2 && tokenSlash != NULL; i++)
     {
@@ -49,15 +60,17 @@ bool extractCodeIdFromTopic(char* topic, long* codeid_){
     return true;
 }
 
-bool extractDipCodeFromTopic(char *topic, char *code1_, char *code2_)
+bool DeviceSwitchFactory::extractDipCodeFromTopic(const char *topic, char *code1_, char *code2_)
 {
     // rfdevices / [unique identifier] / dip / [code1:code2] / switch
     const char searchSlash[2] = "/";
     const char searchDoublePoint[2] = ":";
     const int codeSegmentLength = 5;
     char *tokenSlash;
+    char topicSearch [strlen(topic) + 1];
+    strcpy(topicSearch, topic);
 
-    tokenSlash = strtok(topic, searchSlash);
+    tokenSlash = strtok(topicSearch, searchSlash);
     // skip all tokens till "dip"
     for (int i = 0; i < 2 && tokenSlash != NULL; i++)
     {
@@ -75,7 +88,7 @@ bool extractDipCodeFromTopic(char *topic, char *code1_, char *code2_)
     tokenSlash = strtok(NULL, searchSlash);
     if (tokenSlash == NULL || strcmp(tokenSlash, "switch") != 0)
     {
-        // TODO: wrong topic
+        // TODO: wrong topicRFSenderMock()
         std::cerr << "WRONG TOPIC, expected /switch" << std::endl;
         return false;
     }
@@ -91,7 +104,42 @@ bool extractDipCodeFromTopic(char *topic, char *code1_, char *code2_)
     }
 
     // copy codes
-    strncpy(code1_, code1, codeSegmentLength);
-    strncpy(code2_, code2, codeSegmentLength);
+    strncpy(code1_, code1, codeSegmentLength + 1);
+    strncpy(code2_, code2, codeSegmentLength + 1);
     return true;
+}
+
+IDeviceSwitch *DeviceSwitchFactory::create(const char *topic)
+{
+    DeviceSwitchFactory::switch_type type = getSwitchType(topic);
+    if (type == unknown)
+    {
+        return NULL;
+    }
+
+    if (type == dip)
+    {
+        char code1[12];
+        char code2[12];
+
+        if (!extractDipCodeFromTopic(topic, code1, code2))
+        {
+            return NULL;
+        }
+        return new DipDeviceSwitch(m_rfSender, code1, code2);
+    }
+
+    if (type == codeid)
+    {
+        long codeId = 0;
+
+        if (!extractCodeIdFromTopic(topic, &codeId))
+        {
+            return NULL;
+        }
+        return new CodeIdDeviceSwitch(m_rfSender, codeId);
+    }
+
+    else
+        return NULL;
 }
