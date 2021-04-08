@@ -1,5 +1,5 @@
 #include <unity.h>
-#include "helpers.h"
+#include <helpers.h>
 
 // void setUp(void) {
 // // set stuff up here
@@ -15,9 +15,7 @@ void testDipCodeParse_whenWrongArea_thenFail(void) {
     char code1[12];
     char code2[12];
     // act
-    extractDipCodeFromTopic(topic, code1, code2);
-    //bool result = extractDipCodeFromTopic(topic, code1, code2);
-    bool result = false;
+    bool result = extractDipCodeFromTopic(topic, code1, code2);
 
     // assert
     TEST_ASSERT_FALSE(result);
