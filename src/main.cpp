@@ -53,77 +53,6 @@ void setup_wifi()
   Serial.println(WiFi.localIP());
 }
 
-void handleDipSwitch(char *topic, char *strPayload)
-{
-  char code1[6] = "";
-  char code2[6] = "";
-
-  if (!DeviceSwitchFactory::extractDipCodeFromTopic(topic, code1, code2))
-  {
-    Serial.printf("Failed to decode codes");
-    return;
-  }
-
-  Serial.printf("Code1: %s\n", code1);
-  Serial.printf("Code2: %s\n", code2);
-
-  String pubTopic = TOPIC_ROOT_DIP + String(code1) + ":" + String(code2) + TOPIC_STATE;
-  if (strcmp(strPayload, "ON") == 0)
-  {
-    Serial.println("Received ON_REQUEST");
-    digitalWrite(LED_BUILTIN, LOW); // Turn the LED on (Note that LOW is the voltage level
-    mySwitch.switchOn(code1, code2);
-    delay(100);
-    Serial.printf("pub: %s\n", pubTopic.c_str());
-    client.publish(pubTopic.c_str(), "ON", true);
-  }
-  if (strcmp(strPayload, "OFF") == 0)
-  {
-    Serial.println("Received OFF_REQUEST");
-    digitalWrite(LED_BUILTIN, HIGH); // Turn the LED on (Note that LOW is the voltage level
-    mySwitch.switchOff(code1, code2);
-    delay(100);
-    Serial.printf("pub: %s\n", pubTopic.c_str());
-    client.publish(pubTopic.c_str(), "OFF", true);
-  }
-}
-
-void handleCodeIdSwitch(char *topic, char *strPayload)
-{
-  long codeid = 0;
-  if (!DeviceSwitchFactory::extractCodeIdFromTopic(topic, &codeid))
-  {
-    Serial.printf("Failed to decode codes");
-    return;
-  }
-
-  Serial.printf("CodeID: %ld\n", codeid);
-
-  String pubTopic = TOPIC_ROOT_CODEID + String(codeid) + TOPIC_STATE;
-  if (strcmp(strPayload, "ON") == 0)
-  {
-    Serial.println("Received ON_REQUEST");
-    digitalWrite(LED_BUILTIN, LOW); // Turn the LED on (Note that LOW is the voltage level
-    //mySwitch.switchOn(code1, code2);
-    //mySwitch.send(10400573, 24);
-    //mySwitch.send(codeid, 24);
-    delay(100);
-    Serial.printf("pub: %s\n", pubTopic.c_str());
-    client.publish(pubTopic.c_str(), "ON", true);
-  }
-  if (strcmp(strPayload, "OFF") == 0)
-  {
-    Serial.println("Received OFF_REQUEST");
-    digitalWrite(LED_BUILTIN, HIGH); // Turn the LED on (Note that LOW is the voltage level
-    //mySwitch.switchOff(code1, code2);
-    //mySwitch.send(10400565, 24);
-    //mySwitch.send(codeid - 8, 24);
-    delay(100);
-    Serial.printf("pub: %s\n", pubTopic.c_str());
-    client.publish(pubTopic.c_str(), "OFF", true);
-  }
-}
-
 void callback(char *topic, byte *payload, unsigned int length)
 {
   Serial.print("Message arrived [");
@@ -148,9 +77,6 @@ void callback(char *topic, byte *payload, unsigned int length)
   {
     Serial.println("Received ON_REQUEST");
     digitalWrite(LED_BUILTIN, LOW); // Turn the LED on (Note that LOW is the voltage level
-    //mySwitch.switchOn(code1, code2);
-    //mySwitch.send(10400573, 24);
-    //mySwitch.send(codeid, 24);
     deviceSwitch->turnOn();
     delay(100);
     Serial.printf("pub: %s\n", pubTopic.c_str());
@@ -160,57 +86,11 @@ void callback(char *topic, byte *payload, unsigned int length)
   {
     Serial.println("Received OFF_REQUEST");
     digitalWrite(LED_BUILTIN, HIGH); // Turn the LED on (Note that LOW is the voltage level
-    //mySwitch.switchOff(code1, code2);
-    //mySwitch.send(10400565, 24);
-    //mySwitch.send(codeid - 8, 24);
     deviceSwitch->turnOff();
     delay(100);
     Serial.printf("pub: %s\n", pubTopic.c_str());
     client.publish(pubTopic.c_str(), "OFF", true);
   }
-
-  /*
-  DeviceSwitchFactory::switch_type switchType = DeviceSwitchFactory::getSwitchType(topic);
-  if (switchType == DeviceSwitchFactory::dip)
-  {
-    handleDipSwitch(topic, strPayload);
-  }
-  else if (switchType == DeviceSwitchFactory::codeid)
-  {
-    handleCodeIdSwitch(topic, strPayload);
-  }
-  else{
-    Serial.printf("Unexpected Switch");
-  }
-  */
-
-  /*
-  if(strlen(strPayload) != 11){
-    Serial.printf("Unpexcted rf code length (expected 10): %d\n", strlen(strPayload));
-    return;
-  }
-
-  char code1[6];
-  char code2[6];
-  strncpy ( code1, strPayload, sizeof(code1) );
-  strncpy ( code2, strPayload + sizeof(code1), sizeof(code2) );
-  code1[5] = 0;
-  code2[5] = 0;
-
-  Serial.printf("Code1: %s\n", code1);
-  Serial.printf("Code2: %s\n", code2);
-  String strTopic = String(topic);
-  if(strTopic.equals(TOPIC_ON)){
-    Serial.print("Received ON_REQUEST");
-    digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
-    mySwitch.switchOn(code1, code2);
-  }
-  if(strTopic.equals(TOPIC_OFF)){
-    Serial.print("Received OFF_REQUEST");
-    digitalWrite(BUILTIN_LED, HIGH);   // Turn the LED on (Note that LOW is the voltage level
-    mySwitch.switchOff(code1, code2);
-  }
-  */
 }
 
 String macToStr(const uint8_t *mac)
