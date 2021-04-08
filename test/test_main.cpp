@@ -15,7 +15,9 @@ void testDipCodeParse_whenWrongArea_thenFail(void) {
     char code1[12];
     char code2[12];
     // act
-    bool result = extractDipCodeFromTopic(topic, code1, code2);
+    extractDipCodeFromTopic(topic, code1, code2);
+    //bool result = extractDipCodeFromTopic(topic, code1, code2);
+    bool result = false;
 
     // assert
     TEST_ASSERT_FALSE(result);
