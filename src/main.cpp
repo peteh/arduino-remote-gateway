@@ -69,7 +69,7 @@ void handleDipSwitch(char *topic, char *strPayload)
   if (strcmp(strPayload, "ON") == 0)
   {
     Serial.println("Received ON_REQUEST");
-    digitalWrite(BUILTIN_LED, LOW); // Turn the LED on (Note that LOW is the voltage level
+    digitalWrite(LED_BUILTIN, LOW); // Turn the LED on (Note that LOW is the voltage level
     mySwitch.switchOn(code1, code2);
     delay(100);
     Serial.printf("pub: %s\n", pubTopic.c_str());
@@ -78,7 +78,7 @@ void handleDipSwitch(char *topic, char *strPayload)
   if (strcmp(strPayload, "OFF") == 0)
   {
     Serial.println("Received OFF_REQUEST");
-    digitalWrite(BUILTIN_LED, HIGH); // Turn the LED on (Note that LOW is the voltage level
+    digitalWrite(LED_BUILTIN, HIGH); // Turn the LED on (Note that LOW is the voltage level
     mySwitch.switchOff(code1, code2);
     delay(100);
     Serial.printf("pub: %s\n", pubTopic.c_str());
@@ -88,8 +88,6 @@ void handleDipSwitch(char *topic, char *strPayload)
 
 void handleCodeIdSwitch(char *topic, char *strPayload)
 {
-  char code1[6] = "";
-  char code2[6] = "";
   long codeid = 0;
   if (!extractCodeIdFromTopic(topic, &codeid))
   {
@@ -97,13 +95,13 @@ void handleCodeIdSwitch(char *topic, char *strPayload)
     return;
   }
 
-  Serial.printf("CodeID: %d\n", codeid);
+  Serial.printf("CodeID: %ld\n", codeid);
 
   String pubTopic = TOPIC_ROOT_CODEID + String(codeid) + TOPIC_STATE;
   if (strcmp(strPayload, "ON") == 0)
   {
     Serial.println("Received ON_REQUEST");
-    digitalWrite(BUILTIN_LED, LOW); // Turn the LED on (Note that LOW is the voltage level
+    digitalWrite(LED_BUILTIN, LOW); // Turn the LED on (Note that LOW is the voltage level
     //mySwitch.switchOn(code1, code2);
     //mySwitch.send(10400573, 24);
     mySwitch.send(codeid, 24);
@@ -114,7 +112,7 @@ void handleCodeIdSwitch(char *topic, char *strPayload)
   if (strcmp(strPayload, "OFF") == 0)
   {
     Serial.println("Received OFF_REQUEST");
-    digitalWrite(BUILTIN_LED, HIGH); // Turn the LED on (Note that LOW is the voltage level
+    digitalWrite(LED_BUILTIN, HIGH); // Turn the LED on (Note that LOW is the voltage level
     //mySwitch.switchOff(code1, code2);
     //mySwitch.send(10400565, 24);
     mySwitch.send(codeid - 8, 24);
@@ -243,7 +241,7 @@ void reconnect()
 
 void setup()
 {
-  pinMode(BUILTIN_LED, OUTPUT); // Initialize the BUILTIN_LED pin as an output
+  pinMode(LED_BUILTIN, OUTPUT); // Initialize the BUILTIN_LED pin as an output
   // Transmitter is connected to Arduino Pin #10
   mySwitch.enableTransmit(PIN_D3);
   mySwitch.enableReceive(PIN_D2); // Receiver input on interrupt 0 (D2)
