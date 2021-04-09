@@ -27,49 +27,38 @@ const String TOPIC_ROOT_CODEID = "rfdevices/station1/codeid/";
 const String TOPIC_SWITCH = "/switch";
 const String TOPIC_STATE = "/status";
 
-long timeBetweenMessages = 1000 * 20 * 1;
-
 WiFiClient espClient;
 PubSubClient client(espClient);
-long lastMsg = 0;
-int value = 0;
 
 int status = WL_IDLE_STATUS; // the starting Wifi radio's status
 
 void setup_wifi()
 {
   delay(10);
-  // We start by connecting to a WiFi network
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
+  Log::infof("Connecting to %s", ssid);
   WiFi.begin(ssid, pswd);
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
-    Serial.print(".");
+    Log::info(".");
   }
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+  Log::info("WiFi connected");
+  Log::infof("IP address: %s", WiFi.localIP().toString().c_str());
 }
 
 void callback(char *topic, byte *payload, unsigned int length)
 {
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
-
+  Log::infof("Message arrived [%s]", topic);
   char strPayload[length + 1];
   memcpy(strPayload, payload, length);
   strPayload[length] = 0; // Null termination.
-  Serial.printf("Payload: %s\n", strPayload);
+  Log::infof("Payload: %s\n", strPayload);
+
   IDeviceSwitch *deviceSwitch = g_deviceSwitchFactory.create(topic);
 
   if (deviceSwitch == NULL)
   {
-    Serial.printf("Unexpected Switch");
+    Log::error("Unexpected Switch");
     return;
   }
 
@@ -77,20 +66,20 @@ void callback(char *topic, byte *payload, unsigned int length)
   pubTopic.replace(TOPIC_SWITCH, TOPIC_STATE);
   if (strcmp(strPayload, "ON") == 0)
   {
-    Serial.println("Received ON_REQUEST");
+    Log::info("Received ON_REQUEST");
     digitalWrite(LED_BUILTIN, LOW); // Turn the LED on (Note that LOW is the voltage level
     deviceSwitch->turnOn();
     delay(100);
-    Serial.printf("pub: %s\n", pubTopic.c_str());
+    Log::infof("pub: %s\n", pubTopic.c_str());
     client.publish(pubTopic.c_str(), "ON", true);
   }
   if (strcmp(strPayload, "OFF") == 0)
   {
-    Serial.println("Received OFF_REQUEST");
+    Log::info("Received OFF_REQUEST");
     digitalWrite(LED_BUILTIN, HIGH); // Turn the LED on (Note that LOW is the voltage level
     deviceSwitch->turnOff();
     delay(100);
-    Serial.printf("pub: %s\n", pubTopic.c_str());
+    Log::infof("pub: %s\n", pubTopic.c_str());
     client.publish(pubTopic.c_str(), "OFF", true);
   }
 }
@@ -122,7 +111,7 @@ void reconnect()
   // Loop until we're reconnected
   while (!client.connected())
   {
-    Serial.print("Attempting MQTT connection...");
+    Log::info("Attempting MQTT connection...");
 
     String clientId = composeClientID();
     clientId += "-";
@@ -131,28 +120,24 @@ void reconnect()
     // Attempt to connect
     if (client.connect(clientId.c_str()))
     {
-      Serial.println("connected");
+      Log::info("connected");
       // Once connected, publish an announcement...
       //client.publish(ROOT_TOPIC.c_str(), ("connected " + composeClientID()).c_str() , true );
       // ... and resubscribe
       // topic + clientID + in
       String subscribeTopic = TOPIC_ROOT_DIP + "+" + TOPIC_SWITCH;
       client.subscribe(subscribeTopic.c_str());
-      Serial.print("subscribed to : ");
-      Serial.println(subscribeTopic);
+      Log::infof("subscribed to: ", subscribeTopic);
 
       String subscribeTopicCodeId = TOPIC_ROOT_CODEID + "+" + TOPIC_SWITCH;
       client.subscribe(subscribeTopicCodeId.c_str());
-      Serial.print("subscribed to : ");
-      Serial.println(subscribeTopicCodeId);
+      Log::infof("subscribed to: ", subscribeTopicCodeId);
     }
     else
     {
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
-      Serial.print(" wifi=");
-      Serial.print(WiFi.status());
-      Serial.println(" try again in 5 seconds");
+      Log::errorf("failed, rc=%d", client.state());
+      Log::errorf(" wifi=%d", WiFi.status());
+      Log::error(" try again in 5 seconds");
       // Wait 5 seconds before retrying
       delay(5000);
     }
@@ -203,31 +188,6 @@ void loop()
     //Serial.println(mySwitch.getReceivedProtocol());
     Serial.printf("Delay: %d\n", mySwitch.getReceivedDelay());
     mySwitch.resetAvailable();
-  }
-  */
-  /*
-  long now = millis();
-  if (now - lastMsg > timeBetweenMessages)
-  {
-    lastMsg = now;
-    ++value;
-    String payload = "{\"micros\":";
-    payload += micros();
-    payload += ",\"counter\":";
-    payload += value;
-    payload += ",\"client\":";
-    payload += composeClientID();
-    payload += "}";
-    String pubTopic;
-    pubTopic += "test";
-    pubTopic += "/";
-    pubTopic += composeClientID();
-    pubTopic += "/out";
-    Serial.print("Publish topic: ");
-    Serial.println(pubTopic);
-    Serial.print("Publish message: ");
-    Serial.println(payload);
-    client.publish((char *)pubTopic.c_str(), (char *)payload.c_str(), true);
   }
   */
 }
