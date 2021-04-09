@@ -5,6 +5,8 @@
 #include <DeviceSwitch.h>
 #include <DeviceSwitchFactory.h>
 #include <RFSenderRCSwitch.h>
+#include <Log.h>
+#include <SerialLogger.h>
 
 #define PIN_D3 0
 #define PIN_D2 4
@@ -159,6 +161,7 @@ void reconnect()
 
 void setup()
 {
+  Log::init(new SerialLogger());
   pinMode(LED_BUILTIN, OUTPUT); // Initialize the BUILTIN_LED pin as an output
   // Transmitter is connected to Arduino Pin #10
   mySwitch.enableTransmit(PIN_D3);
