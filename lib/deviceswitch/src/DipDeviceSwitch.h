@@ -7,8 +7,8 @@ class DipDeviceSwitch : public IDeviceSwitch
 {
 public:
     DipDeviceSwitch(IRFSender* rfSender, char *code1, char *code2);
-    virtual void turnOn();
-    virtual void turnOff();
+    virtual void turnOn() override;
+    virtual void turnOff() override;
 
     char *getCode1()
     {
