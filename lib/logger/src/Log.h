@@ -9,14 +9,14 @@ public:
     static void init(ILogger *log);
 
     static void info(const char *str);
-    static void info(const char *fmt, va_list argp);
+    static void infof(const char *fmt, ...);
 
     static void warn(const char *str);
-    static void warn(const char *fmt, va_list argp);
+    static void warnf(const char *fmt, ...);
 
     static void error(const char *str);
-    static void error(const char *fmt, va_list argp);
-    
+    static void errorf(const char *fmt, ...);
+
 private:
     Log();
     static Log *instance();
