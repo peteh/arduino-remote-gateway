@@ -18,6 +18,7 @@ public:
 private:
     IRFSender* m_rfSender;
     long m_codeId;
+    unsigned int m_resends = 3;
 };
 
 #endif
