@@ -150,7 +150,7 @@ void setup()
   pinMode(LED_BUILTIN, OUTPUT); // Initialize the BUILTIN_LED pin as an output
   // Transmitter is connected to Arduino Pin #10
   mySwitch.enableTransmit(PIN_D3);
-  mySwitch.enableReceive(PIN_D2); // Receiver input on interrupt 0 (D2)
+  //mySwitch.enableReceive(PIN_D2); // Receiver input on interrupt 0 (D2)
 
   // Optional set pulse length.
   //mySwitch.setPulseLength(pulseLength);

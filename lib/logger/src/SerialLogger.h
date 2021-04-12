@@ -1,6 +1,6 @@
 #ifndef SERIAL_LOGGER_H
 #define SERIAL_LOGGER_H
-#include "logger.h"
+#include "Logger.h"
 #include <HardwareSerial.h>
 
 class SerialLogger : public ILogger

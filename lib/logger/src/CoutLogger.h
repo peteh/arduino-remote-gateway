@@ -1,7 +1,7 @@
 #ifndef COUT_LOGGER_H
 #define COUT_LOGGER_H
 #include <iostream>
-#include "logger.h"
+#include "Logger.h"
 
 class CoutLogger : public ILogger
 {

@@ -6,7 +6,7 @@
 class DipDeviceSwitch : public IDeviceSwitch
 {
 public:
-    DipDeviceSwitch(IRFSender* rfSender, char *code1, char *code2);
+    DipDeviceSwitch(IRFSender *rfSender, char *code1, char *code2);
     virtual void turnOn() override;
     virtual void turnOff() override;
 
@@ -21,9 +21,10 @@ public:
     }
 
 private:
-    IRFSender* m_rfSender;
+    IRFSender *m_rfSender;
     char *m_code1;
     char *m_code2;
+    unsigned int m_resend;
 };
 
 #endif
