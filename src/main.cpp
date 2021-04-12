@@ -127,11 +127,11 @@ void reconnect()
       // topic + clientID + in
       String subscribeTopic = TOPIC_ROOT_DIP + "+" + TOPIC_SWITCH;
       client.subscribe(subscribeTopic.c_str());
-      Log::infof("subscribed to: ", subscribeTopic);
+      Log::infof("subscribed to: %s", subscribeTopic.c_str());
 
       String subscribeTopicCodeId = TOPIC_ROOT_CODEID + "+" + TOPIC_SWITCH;
       client.subscribe(subscribeTopicCodeId.c_str());
-      Log::infof("subscribed to: ", subscribeTopicCodeId);
+      Log::infof("subscribed to: %s", subscribeTopicCodeId.c_str());
     }
     else
     {
