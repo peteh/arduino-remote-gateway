@@ -48,10 +48,10 @@ bool DeviceSwitchFactory::extractCodeIdFromTopic(const char *topic, long *codeid
 
     char *code = strtok(NULL, searchSlash);
     tokenSlash = strtok(NULL, searchSlash);
-    if (tokenSlash == NULL || strcmp(tokenSlash, "switch") != 0)
+    if (tokenSlash == NULL || strcmp(tokenSlash, "cmd") != 0)
     {
         // TODO: wrong topic
-        std::cerr << "WRONG TOPIC, expected /switch" << std::endl;
+        std::cerr << "WRONG TOPIC, expected /cmd" << std::endl;
         return false;
     }
 
@@ -86,10 +86,11 @@ bool DeviceSwitchFactory::extractDipCodeFromTopic(const char *topic, char *code1
 
     char *code = strtok(NULL, searchSlash);
     tokenSlash = strtok(NULL, searchSlash);
-    if (tokenSlash == NULL || strcmp(tokenSlash, "switch") != 0)
+    // TODO: this should be configurable
+    if (tokenSlash == NULL || strcmp(tokenSlash, "cmd") != 0)
     {
         // TODO: wrong topicRFSenderMock()
-        std::cerr << "WRONG TOPIC, expected /switch" << std::endl;
+        std::cerr << "WRONG TOPIC, expected /cmd" << std::endl;
         return false;
     }
 

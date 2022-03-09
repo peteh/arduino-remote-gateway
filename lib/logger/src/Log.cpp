@@ -2,11 +2,26 @@
 #include "CoutLogger.h"
 #include <cstdio>
 
-Log *Log::m_instance = NULL;
+Log *Log::m_instance = nullptr;
 
 void Log::init(ILogger *log)
 {
     instance()->m_log = log;
+}
+
+void Log::debug(const char *str)
+{
+    instance()->m_log->debug(str);
+}
+
+void Log::debugf(const char *fmt, ...)
+{
+    char buffer[256];
+    va_list myargs;
+    va_start(myargs, fmt);
+    vsprintf(buffer, fmt, myargs);
+    va_end(myargs);
+    debug(buffer);
 }
 
 void Log::info(const char *str)
@@ -16,12 +31,12 @@ void Log::info(const char *str)
 
 void Log::infof(const char *fmt, ...)
 {
-    char *s = NULL;
+    char buffer[256];
     va_list myargs;
     va_start(myargs, fmt);
-    vsprintf(s, fmt, myargs);
+    vsprintf(buffer, fmt, myargs);
     va_end(myargs);
-    info(s);
+    info(buffer);
 }
 
 void Log::warn(const char *str)
@@ -31,12 +46,12 @@ void Log::warn(const char *str)
 
 void Log::warnf(const char *fmt, ...)
 {
-    char *s = NULL;
+    char buffer[256];
     va_list myargs;
     va_start(myargs, fmt);
-    vsprintf(s, fmt, myargs);
+    vsprintf(buffer, fmt, myargs);
     va_end(myargs);
-    warn(s);
+    warn(buffer);
 }
 
 void Log::error(const char *str)
@@ -46,12 +61,12 @@ void Log::error(const char *str)
 
 void Log::errorf(const char *fmt, ...)
 {
-    char *s = NULL;
+    char buffer[256];
     va_list myargs;
     va_start(myargs, fmt);
-    vsprintf(s, fmt, myargs);
+    vsprintf(buffer, fmt, myargs);
     va_end(myargs);
-    error(s);
+    error(buffer);
 }
 
 Log *Log::instance()

@@ -8,6 +8,9 @@ class Log
 public:
     static void init(ILogger *log);
 
+    static void debug(const char *str);
+    static void debugf(const char *fmt, ...);
+
     static void info(const char *str);
     static void infof(const char *fmt, ...);
 
