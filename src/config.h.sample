@@ -1,0 +1,5 @@
+#pragma once
+#include <Arduino.h>
+const char *ssid = "iot";
+const char *pswd = "iotdev1337";
+const char *mqtt_server = "homeassistant.local";

@@ -7,6 +7,8 @@
 #include <RFSenderRCSwitch.h>
 #include <Log.h>
 #include <SerialLogger.h>
+#include "config.h"
+
 
 #define PIN_RF_WRITE D3
 #define PIN_D2 4
@@ -15,9 +17,7 @@ RFSenderRCSwitch mySwitch = RFSenderRCSwitch(RCSwitch());
 DeviceSwitchFactory g_deviceSwitchFactory(&mySwitch);
 // Update these with values suitable for your network.
 
-const char *ssid = "iot";
-const char *pswd = "iotdev1337";
-const char *mqtt_server = "homeassistant.local";
+
 const String SUBSCRIBE_TOPIC_DIP = "rfdevices/station1/dip/+/switch";
 const String TOPIC_ROOT_DIP = "rfdevices/station1/dip/";
 
